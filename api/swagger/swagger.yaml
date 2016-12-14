@@ -2,59 +2,387 @@ swagger: "2.0"
 info:
   version: "0.0.1"
   title: Arduino API
-# during dev, should point to your local machine
-host: localhost:10010
-# basePath prefixes all resource paths 
+host: localhost:3000
 basePath: /api/shield/
-# 
 schemes:
-  # tip: remove http to make production-grade
   - http
   - https
-# format of bodies a client can send (Content-Type)
 consumes:
   - application/json
-# format of the responses to the client (Accepts)
 produces:
   - application/json
 paths:
-  /hello:
-    # binds a127 app logic to a route
-    x-swagger-router-controller: hello_world
+  /{id_client}/bases:
+    x-swagger-router-controller: baseCtrl
     get:
-      description: Returns 'Hello' to the caller
-      # used as the method name of the controller
-      operationId: hello
+      description: Returns clients' Arduino
+      operationId: getBaseByClient
       parameters:
-        - name: name
-          in: query
-          description: The name of the person to whom to say hello
-          required: false
+        - name: id_client
+          in: path
+          description: The id of the client
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/baseClientResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{id_client}/base/{serial_num}/sensor:
+    x-swagger-router-controller: baseCtrl
+    get:
+      description: Returns all sensor of a base
+      operationId: getAllSensorBySerialNum
+      parameters:
+        - name: id_client
+          in: path
+          description: The id of the client
+          required: true
+          type: integer
+        - name: serial_num
+          in: path
+          description: The serial number of the base
+          required: true
           type: string
       responses:
         "200":
           description: Success
           schema:
-            # a pointer to a definition
-            $ref: "#/definitions/HelloWorldResponse"
-        # responses may fall through to errors
+            $ref: "#/definitions/allSensorsResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{id_client}/base/{serial_num}/sensors/{type_module}:
+    x-swagger-router-controller: baseCtrl
+    get:
+      description: Returnsa sensor
+      operationId: getSensorBySerialNum
+      parameters:
+        - name: id_client
+          in: path
+          description: The id of the client
+          required: true
+          type: integer
+        - name: serial_num
+          in: path
+          description: The serial number of the base
+          required: true
+          type: string
+        - name: type_module
+          in: path
+          description: The id of the given sensor
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/sensorsResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{id_client}/base/{location}/sensors/:
+      x-swagger-router-controller: baseCtrl
+      get:
+        description: Returns sensors by client by location
+        operationId: getSensorByLocation
+        parameters:
+          - name: id_client
+            in: path
+            description: The id of the client
+            required: true
+            type: integer
+          - name: location
+            in: path
+            description: The location of sensor
+            required: true
+            type: string
+        responses:
+          "200":
+            description: Success
+            schema:
+              $ref: "#/definitions/sensorsResponse"
+          default:
+            description: Error
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+  /{id_client}/base/{serial_num}/alarm:
+    x-swagger-router-controller: baseCtrl
+    put:
+      description: Modify value of sensor alarm
+      operationId: updateSensorAlarmValue
+      parameters:
+        - name: id_client
+          in: path
+          description: The id of the client
+          required: true
+          type: integer
+        - name: serial_num
+          in: path
+          description: The serial number of the base
+          required: true
+          type: string
+      responses:
+        "201":
+          description: Success
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{id_client}/base/{serial_num}/sonor_alarm:
+    x-swagger-router-controller: baseCtrl
+    put:
+      description: Modify value of sensor sonor alarm
+      operationId: updateSensorSonorAlarmValue
+      parameters:
+        - name: id_client
+          in: path
+          description: The id of the client
+          required: true
+          type: integer
+        - name: serial_num
+          in: path
+          description: The serial number of the base
+          required: true
+          type: string
+      responses:
+        "201":
+          description: Success
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{id_client}/base/{location}/sensors:
+    x-swagger-router-controller: baseCtrl
+    get:
+      description: Returns all sensor of a base
+      operationId: getAllSensorByLocation
+      parameters:
+        - name: id_client
+          in: path
+          description: The id of the client
+          required: true
+          type: integer
+        - name: location
+          in: path
+          description: The location of the sensor
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/sensorsLocationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /client:
+    x-swagger-router-controller: baseCtrl
+    post:
+      produces:
+        - application/json
+      description: Add a new client
+      operationId: addClient
+      parameters:
+        - name: client
+          description: Client properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/client"
+      responses:
+        "201":
+          description: Success
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /base:
+    x-swagger-router-controller: baseCtrl
+    post:
+      produces:
+        - application/json
+      description: Add a new base
+      operationId: addBase
+      parameters:
+        - name: base
+          description: Base properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/base"
+      responses:
+        "201":
+          description: Success
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /sensor:
+    x-swagger-router-controller: baseCtrl
+    post:
+      produces:
+        - application/json
+      description: Add a new sensor
+      operationId: addSensor
+      parameters:
+        - name: sensor
+          description: Sensor properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/sensor"
+      responses:
+        "201":
+          description: Success
         default:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
   /swagger:
     x-swagger-pipe: swagger_raw
-# complex objects have schema definitions
 definitions:
-  HelloWorldResponse:
+  baseClientResponse:
     required:
-      - message
+      - serial_num
+      - location
+      - id_client
     properties:
+      serial_num:
+        type: string
+      location:
+        type: string
+      id_client:
+        type: integer
+      gamme:
+        type: string
+      activate:
+        type: boolean
+      sound_alert:
+        type: boolean
+  allSensorsResponse:
+    required:
+      - date
+      - type_module
+      - location
+      - value
+      - serial_num
+    properties:
+      date:
+        type: string
+        format: date
+      type_module:
+        type: string
+      location:
+        type: string
+      value:
+        type: string
+      serial_num:
+        type: string
+  sensorsResponse:
+    required:
+      - date
+      - type_module
+      - location
+      - value
+      - serial_num
+    properties:
+      date:
+        type: string
+        format: date
+      type_module:
+        type: string
+      location:
+        type: string
+      value:
+        type: string
+      serial_num:
+        type: string
+  sensorsLocationResponse:
+    required:
+      - date
+      - type_module
+      - location
+      - value
+      - serial_num
+    properties:
+      date:
+        type: string
+        format: date
+      type_module:
+        type: string
+      location:
+        type: string
+      value:
+        type: string
+      serial_num:
+        type: string
+  client:
+    type: object
+    properties:
+      client_id:
+        type: integer
+        description: Client id
+      name:
+        type: string
+        description: Client name
+      address:
+        type: string
+        description: Client address
+    required:
+      - client_id
+      - name
+      - address
+  base:
+    type: object
+    properties:
+      serial_num:
+        type: string
+        description: Base serial number
+      location:
+        type: string
+        description: Base location
+      client_id:
+        type: integer
+        description: Client id
+      gamme:
+        type: string
+        description: Base gamme
+    required:
+      - serial_num
+      - location
+      - client_id
+      - gamme
+  sensor:
+    type: object
+    properties:
+      type_module:
+        type: string
+        description: Sensor type
+      value:
+        type: string
+        description: Sensor value
+      serial_num:
+        type: string
+        description: Base serial number
+    required:
+      - type_module
+      - value
+      - serial_num
+  ErrorResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
       message:
         type: string
-  ErrorResponse:
-    required:
-      - message
-    properties:
-      message:
+      fields:
         type: string
